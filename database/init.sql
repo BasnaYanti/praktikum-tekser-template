@@ -1,7 +1,4 @@
-CREATE DATABASE IF NOT EXISTS siapprodi;
-USE siapprodi;
-
-CREATE TABLE users (
+CREATE TABLE users IF NOT EXISTS (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     nama VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -9,7 +6,7 @@ CREATE TABLE users (
     role ENUM('mahasiswa', 'admin') DEFAULT 'mahasiswa'
 );
 
-CREATE TABLE aspirasi_pengaduan (
+CREATE TABLE aspirasi_pengaduan IF NOT EXISTS(
     id_aspirasi INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     kategori ENUM('aspirasi', 'pengaduan') NOT NULL,
