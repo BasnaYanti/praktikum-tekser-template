@@ -1,4 +1,5 @@
-CREATE TABLE users IF NOT EXISTS (
+-- CREATE TABLE harus pakai IF NOT EXISTS di awal, bukan di tengah
+CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     nama VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -6,7 +7,7 @@ CREATE TABLE users IF NOT EXISTS (
     role ENUM('mahasiswa', 'admin') DEFAULT 'mahasiswa'
 );
 
-CREATE TABLE aspirasi_pengaduan IF NOT EXISTS(
+CREATE TABLE IF NOT EXISTS aspirasi_pengaduan (
     id_aspirasi INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     kategori ENUM('aspirasi', 'pengaduan') NOT NULL,
@@ -17,6 +18,6 @@ CREATE TABLE aspirasi_pengaduan IF NOT EXISTS(
 );
 
 -- Data Dummy
-INSERT INTO users (nama, email, password, role) VALUES 
+INSERT IGNORE INTO users (nama, email, password, role) VALUES 
 ('Admin Prodi', 'admin@prodi.ac.id', 'admin123', 'admin'),
 ('Budi Mahasiswa', 'budi@mhs.ac.id', 'mhs123', 'mahasiswa');
