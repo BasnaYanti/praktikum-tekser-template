@@ -34,6 +34,21 @@ router.get('/', isAuth, async (req, res) => {
     }
 });
 
+// --- LOGIN & LOGOUT ---
+router.get('/login', (req, res) => res.render('login'));
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    const [rows] = await db.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
+    if (rows.length > 0) {
+        req.session.loggedin = true;
+        req.session.user = rows[0];
+        res.redirect('/');
+    } else {
+        res.send("<script>alert('Salah!'); window.location='/login';</script>");
+    }
+});
+router.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/login'); });
+
 // ==========================================
 // --- FITUR EDIT (UPDATE) ---
 // ==========================================
@@ -85,21 +100,6 @@ router.get('/update-status/:id/:statusbaru', isAuth, async (req, res) => {
         res.send("Gagal update status");
     }
 });
-
-// --- LOGIN & LOGOUT ---
-router.get('/login', (req, res) => res.render('login'));
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    const [rows] = await db.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
-    if (rows.length > 0) {
-        req.session.loggedin = true;
-        req.session.user = rows[0];
-        res.redirect('/');
-    } else {
-        res.send("<script>alert('Salah!'); window.location='/login';</script>");
-    }
-});
-router.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/login'); });
 
 // --- TAMBAH LAPORAN (MAHASISWA) ---
 router.post('/tambah', isAuth, async (req, res) => {
