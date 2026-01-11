@@ -2,65 +2,54 @@ version: "3.8"
 
 services:
   # --- 1. DATABASE SERVICE ---
-  db_E5:  # Ganti db_service menjadi db_E5
+  db_service:
     image: mysql:8.0
-    container_name: db_E5
+    container_name: db_${GROUP_NAME}
     restart: always
     environment:
-      MYSQL_DATABASE: tekser_menfess
-      MYSQL_USER: menfesapp
-      MYSQL_PASSWORD: password123
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
       MYSQL_ROOT_PASSWORD: rootpassword
     volumes:
-      - db_data_E5:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Pastikan file ini ada
+      - db_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - app_network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      - tekser-network
 
   # --- 2. APP SERVICE ---
-  app_E5:  # Ganti app_service menjadi app_E5
+  app_service:
     build: ./app
-    container_name: app_E5
+    container_name: app_${GROUP_NAME}
     restart: always
     expose:
       - "3000"
     environment:
-      DB_HOST: db_E5  # Harus sama dengan nama service database
-      DB_USER: menfesapp
-      DB_PASS: password123
-      DB_NAME: tekser_menfess
-      APP_PORT: 3000
-      NODE_ENV: production
+      - DB_HOST=db_service
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - APP_PORT=3000
     depends_on:
-      db_E5:
-        condition: service_healthy
-    volumes:
-      - ./app:/app  # Mount source code untuk development
-      - /app/node_modules  # Jaga node_modules terpisah
+      - db_service
     networks:
-      - app_network
-    command: sh -c "npm install && npm start"
+      - tekser-network
 
   # --- 3. NGINX SERVICE ---
-  nginx_E5:  # Ganti nginx_service menjadi nginx_E5
+  nginx_service:
     image: nginx:alpine
-    container_name: nginx_E5
+    container_name: nginx_${GROUP_NAME}
     restart: always
     ports:
-      - "2585:80"  # Port yang sudah berhasil
+      - "${APP_PORT}:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./app/public:/usr/share/nginx/html  # Jika ada static files
     depends_on:
-      - app_E5
+      - app_service
     networks:
-      - app_network
+      - tekser-network
 
-# --- VOLUMES ---
+#--- VOLUMES AND NETWORKS ---
 volumes:
   db_data:
     name: mysql_data_${GROUP_NAME}
@@ -70,4 +59,3 @@ networks:
   tekser-network:
     driver: bridge
     name: net_tekser_${GROUP_NAME}
-
